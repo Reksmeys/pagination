@@ -1,20 +1,11 @@
-### Features
 
-- Create pages easily
-- Fire customized function with page selection
-- Customize class help for more flexibility
-- Minified version 4.4kb
-
-### Links
-
-`<demo page>` : <https://okisht.github.io/Jquery-Paginator/paginator>
+`<demo example>` : <https://github.com/Reksmeys/pagination/blob/master/index.html>
 
 Before start: All the function in paginator.js you should call with referance page
 
 For ex you will call initPaginator func, then it will be like paginator.initPaginator(yourData);
 
 or if you gonna call destroy ; paginator.destroyPaginator();
-
 
 ### HTML
 
@@ -43,21 +34,66 @@ __'paginationClass'__:  customize your class for the parent element (string)
 
 ```javascript
  $(document).ready(function () {
-    paginator.initPaginator({
-      'previousPage': 'Next Page',
-      'nextPage': 'Previous Page',
-      'totalPage': 34,
-      'triggerFunc': test,
+    let totalPage = 1;
+    $.ajax({
+    url: `http://110.74.194.124:15011/v1/api/articles?page=1&limit=15`,
+    method: 'GET',
+    success: function(res){
+      // first load 
+      content = ''
+        for (article of res.DATA){
+          content += `
+            <tr>
+                <th scope="row">${article.ID}</th>
+                <td>${article.TITLE}</td>
+                <td>${article.DESCRIPTION}</td>
+                <td><button class="btn btn-outline-danger waves">delete</button></td>
+            </tr>
+          `
+        }
+        $('tbody').html(content);
+        //--------------------------------------
+      totalPage = res.PAGINATION.TOTAL_PAGES
+      paginator.initPaginator({
+      'previousPage': 'Next',
+      'nextPage': 'Prev',
+      'totalPage': totalPage,
+      'triggerFunc': renderPage,
       'paginationClass': 'paginatorCustomClass'
     });
+    }
+  })
+    
   });
 ```
 The function example which is triggered right after pages created
 
 ```javascript
-  function test() {
-    var selectdPg = $('.js-paginator').data('pageSelected');
-    $('.js-test').text('page ' + selectdPg);
+  function renderPage() {
+    
+    selectdPg = $('.js-paginator').data('pageSelected');
+   
+    $.ajax({
+      url: `http://110.74.194.124:15011/v1/api/articles?page=${selectdPg}&limit=15`,
+      method: 'get',
+      success: function(res){
+        content = ''
+        for (article of res.DATA){
+          content += `
+            <tr>
+                <th scope="row">${article.ID}</th>
+                <td>${article.TITLE}</td>
+                <td>${article.DESCRIPTION}</td>
+                <td><button class="btn btn-outline-danger waves">delete</button></td>
+            </tr>
+          `
+        }
+        $('tbody').html(content);
+      },
+      error: function(er){
+        console.log(er);
+      }
+    })
   }
 ```
 
